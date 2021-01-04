@@ -4,8 +4,8 @@ from flask_session import Session
 from tempfile import mkdtemp
 from werkzeug.exceptions import default_exceptions, HTTPException, InternalServerError
 from werkzeug.security import check_password_hash, generate_password_hash
-
 from helpers import apology, login_required
+import json
 
 # Configure application
 app = Flask(__name__)
@@ -81,6 +81,70 @@ def login():
         return render_template("login.html")
 
 
+@app.route("/delete", methods=["GET", "POST"])
+@login_required
+def delete():
+    """Delete data from database"""
+    data = request.get_json(force="True")
+
+    db.execute("DELETE FROM data WHERE id = :id", id=data)
+
+    return "ok", 200
+
+
+@app.route("/edit", methods=["GET", "POST"])
+@login_required
+def edit():
+    """Handle edits to db on frontend"""
+
+    data = request.get_json(force="true")
+
+    id_entry = data['id']
+    name = data['name']
+    link = data['link']
+    username = data['username']
+    password = data['hash']
+
+    db.execute("UPDATE data SET name =:name, link =:link, username=:username, hash=:hash WHERE id=:id",
+               name=name, link=link, username=username, hash=password, id=id_entry)
+
+    return "ok", 200
+
+
+@app.route("/main", methods=["GET", "POST"])
+@login_required
+def main():
+
+    user_id = session["user_id"]
+
+    if request.method == "GET":
+        data = db.execute(
+            "SELECT * FROM data WHERE user_id=:user_id ORDER BY name", user_id=user_id)
+        data_json = data
+        password = session["user_pass"]
+
+        return render_template("index.html", dataFromFlask=data_json, dataR=password)
+
+    else:
+        # new data entry
+        name = request.form['name']
+        link = request.form['link']
+        username = request.form['username']
+        password = request.form['password']
+
+        data = db.execute(
+            "SELECT * FROM data WHERE user_id=:user_id", user_id=user_id)
+
+        for entry in data:
+            if name == entry['name'] or link == entry['link']
+            return "duplicate entry", 409
+
+    db.execute("INSERT INTO data (user_id, name, link, username, hash) VALUES (:user_id, :name, :link, :username, :hash",
+               user_id=user_id, name=name, link=link, username=username, hash=password)
+
+    return "success", 202
+
+
 @app.route("/register", methods=["GET", "POST"])
 def register():
     """Register user"""
@@ -109,6 +173,17 @@ def register():
         return redirect("login")
     else:
         return render_template("register.html")
+
+
+@app.route("/logout")
+def logout():
+    """Log user out"""
+
+    # Forget any user_id
+    session.clear()
+
+    # Redirect user to welcome page
+    return redirect("/")
 
 
 def errorhandler(e):
