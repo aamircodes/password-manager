@@ -1,0 +1,48 @@
+{% extends "layout.html" %} {% block title %} Registration form {% endblock title %} {% block main %}
+
+<div class="login-square">
+  <form action="/register" method="post">
+    <h1>Welcome!</h1>
+    <div class="reg-form">
+      <div>
+        <input
+          id="user-reg"
+          class="input no-outline"
+          autocomplete="off"
+          name="username"
+          placeholder="Username"
+          type="text"
+          required
+        />
+      </div>
+      <div class="error-div" id="user-error"></div>
+      <div>
+        <input
+          id="pass-input"
+          class="input no-outline"
+          autocomplete="off"
+          name="password"
+          placeholder="Password"
+          type="password"
+          required
+        />
+      </div>
+      <div class="error-div" id="pass-error"></div>
+      <div>
+        <input
+          id="pass-repeat"
+          class="input no-outline"
+          autocomplete="off"
+          name="confirmation"
+          placeholder="Confirm Password"
+          type="password"
+          required
+        />
+      </div>
+      <div class="error-div" id="pass-verify"></div>
+      <input id="submit-reg" class="button-reg" type="submit" value="SIGN UP" />
+    </div>
+  </form>
+</div>
+<!-- <script src="{{ url_for('static', filename='js/registerCheck.js') }}"></script> -->
+{% endblock %}

@@ -33,12 +33,14 @@ Session(app)
 # Configure Library to use SQLite database
 db = SQL("sqlite:///pmanager.db")
 
+# no check_user function
+
 
 @app.route("/")
 def welcome():
     """Welcome page"""
     if 'user_id' in session:
-        return redirect("/main")
+        return redirect("/index")
     else:
         return render_template("welcome.html")
 
@@ -67,14 +69,14 @@ def login():
 
         # Ensure username exists and password is correct
         if len(rows) != 1 or not check_password_hash(rows[0]["hash"], request.form.get("password")):
-            flash('Incorrect username or password')
+            flash("Incorrect username or password")
             return render_template("login.html")
 
         # Remember which user has logged in
         session["user_id"] = rows[0]["id"]
 
-        # Redirect user to home page
-        return redirect("/main")
+        # Redirect user to index page
+        return redirect("/index")
 
     # User reached route via GET (as by clicking a link or via redirect)
     else:
@@ -95,7 +97,7 @@ def delete():
 @app.route("/edit", methods=["GET", "POST"])
 @login_required
 def edit():
-    """Handle edits to db on frontend"""
+    """Handle field edits to db on frontend"""
 
     data = request.get_json(force="true")
 
@@ -111,9 +113,10 @@ def edit():
     return "ok", 200
 
 
-@app.route("/main", methods=["GET", "POST"])
+@app.route("/index", methods=["GET", "POST"])
 @login_required
-def main():
+def index():
+    """main page for web app"""
 
     user_id = session["user_id"]
 
@@ -136,13 +139,13 @@ def main():
             "SELECT * FROM data WHERE user_id=:user_id", user_id=user_id)
 
         for entry in data:
-            if name == entry['name'] or link == entry['link']
-            return "duplicate entry", 409
+            if name == entry['name'] or link == entry['link']:
+                return "duplicate", 409
 
-    db.execute("INSERT INTO data (user_id, name, link, username, hash) VALUES (:user_id, :name, :link, :username, :hash",
-               user_id=user_id, name=name, link=link, username=username, hash=password)
+        db.execute("INSERT INTO data (user_id, name, link, username, hash) VALUES (:user_id, :name, :link, :username, :hash)",
+                   user_id=user_id, name=name, link=link, username=username, hash=password)
 
-    return "success", 202
+        return "success", 202
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -170,7 +173,8 @@ def register():
 
         db.execute("INSERT INTO users (username, hash) VALUES (:username, :hash)", username=request.form.get(
             "username"), hash=generate_password_hash(request.form.get("password")))
-        return redirect("login")
+        return redirect("/login")
+
     else:
         return render_template("register.html")
 
@@ -196,3 +200,8 @@ def errorhandler(e):
 # Listen for errors
 for code in default_exceptions:
     app.errorhandler(code)(errorhandler)
+
+
+# print errors on the webpage
+if __name__ == "__main__":
+    app.run(debug=True)
