@@ -31,9 +31,7 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 # Configure Library to use SQLite database
-db = SQL("sqlite:///pmanager.db")
-
-# no check_user function
+db = SQL("sqlite:///passwordmanager.db")
 
 
 @app.route("/")
@@ -146,6 +144,21 @@ def index():
                    user_id=user_id, name=name, link=link, username=username, hash=password)
 
         return "success", 202
+
+
+@app.route('/check', methods=["GET", "POST"])
+def check_user():
+    db = SQL("sqlite:///passwordmanager.db")
+    data = request.get_json(force="True")
+
+    user_list = db.execute("SELECT username FROM users")
+    users = []
+    for row in user_list:
+        users.append(row['username'])
+    if data in users:
+        return "ok", 208
+    else:
+        return "ok", 200
 
 
 @app.route("/register", methods=["GET", "POST"])

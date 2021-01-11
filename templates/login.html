@@ -1,0 +1,31 @@
+{% extends 'layout.html' %} {% block title %} Login {% endblock %} {% block main %} {% with messages =
+get_flashed_messages() %} {% if messages %} {% for message in messages %}
+<div class="error-bar">
+  <p>{{message}}</p>
+</div>
+{% endfor %} {% endif %} {% endwith %} {{ message }}
+
+<div class="login-square">
+  <form action="/login" method="post">
+    <h1>Welcome Back!</h1>
+    <div>
+      <input class="input no-outline" type="text" name="username" placeholder="Username" autocomplete="off" required />
+    </div>
+    <div>
+      <input
+        class="input no-outline"
+        type="password"
+        id="passwordField"
+        name="password"
+        placeholder="Password"
+        autocomplete="off"
+        required
+      />
+    </div>
+    <div>
+      <input class="btn-sign-in2" type="submit" value="SIGN IN" />
+    </div>
+  </form>
+</div>
+
+{% endblock %}
